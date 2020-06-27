@@ -9,8 +9,11 @@ import (
 )
 
 func Start() {
+	log.Println("creating client")
 	client := influxdb2.NewClient("http://localhost:8081", "admin:admin")
+	log.Println("creating api")
 	writeApi := client.WriteApiBlocking("", "db0")
+	log.Println("starting")
 	t := time.NewTicker(5 * time.Second)
 	for {
 		r := sensor.Read()
