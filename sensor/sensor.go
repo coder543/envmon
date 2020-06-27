@@ -10,8 +10,10 @@ import (
 )
 
 var sensor *bsbmp.BMP
+var realAlt units.M
+var altOffset units.M
 
-func Init(addr uint8, bus int, realAltitudeFt int) {
+func Init(addr uint8, bus int, realAltitude units.Ft) {
 	// Create new connection to i2c-bus on 1 line with address 0x76.
 	// Use i2cdetect utility to find device address over the i2c-bus
 	i2cConn, err := i2c.NewI2C(addr, bus)
@@ -28,6 +30,8 @@ func Init(addr uint8, bus int, realAltitudeFt int) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	realAlt = realAltitude.ToM()
 }
 
 type Reading struct {
@@ -79,10 +83,18 @@ func Read() Reading {
 
 	// Read atmospheric altitude in meters above sea level, if we assume
 	// that pressure at see level is equal to 101325 Pa.
-	a, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
+	aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
 	if err != nil {
 		log.Panic(err)
 	}
+
+	a := units.M(aRaw)
+
+	if altOffset == 0 {
+		altOffset = a - realAlt
+	}
+
+	a = a - altOffset
 
 	return Reading{
 		Temperature: units.C(t),
