@@ -5,3 +5,4 @@ services:
     volumes:
       - /dev:/dev
     privileged: true
+    network_mode: "host"
