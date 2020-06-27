@@ -7,6 +7,7 @@ import (
 	"github.com/d2r2/go-i2c"
 	"log"
 	"strings"
+	"time"
 )
 
 var sensor *bsbmp.BMP
@@ -36,6 +37,7 @@ type Reading struct {
 	Pressure    units.Pa
 	Humidity    units.Percent
 	Altitude    units.Ft
+	Time        time.Duration
 }
 
 func (r Reading) String() string {
@@ -46,30 +48,31 @@ Reading {
 	Pressure:	%s,
 	Humidity:	%s,
 	Altitude:	%s,
+	MeasureT:	%s,
 }
 		`,
 			r.Temperature,
 			r.Pressure,
 			r.Humidity,
 			r.Altitude,
+			r.Time,
 		),
 	)
 }
 
 func Read() Reading {
-	// Read temperature in celsius degree
+	start := time.Now()
+
 	t, err := sensor.ReadTemperatureC(bsbmp.ACCURACY_ULTRA_HIGH)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	// Read atmospheric pressure in pascal
 	p, err := sensor.ReadPressurePa(bsbmp.ACCURACY_ULTRA_HIGH)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	// Read atmospheric pressure in mmHg
 	supported, rh, err := sensor.ReadHumidityRH(bsbmp.ACCURACY_ULTRA_HIGH)
 	if !supported {
 		log.Panic("BME280 should support humidity")
@@ -78,14 +81,17 @@ func Read() Reading {
 		log.Panic(err)
 	}
 
-	// Read atmospheric altitude in meters above sea level, if we assume
-	// that pressure at see level is equal to 101325 Pa.
-	aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
-	if err != nil {
-		log.Panic(err)
+	avgCount := 5
+	aLarge := units.M(0)
+	for i := 0; i < avgCount; i++ {
+		aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
+		if err != nil {
+			log.Panic(err)
+		}
+		aLarge += units.M(aRaw)
 	}
 
-	a := units.M(aRaw)
+	a := units.M(float32(aLarge) / float32(avgCount))
 
 	if altOffset == 0 {
 		altOffset = a
@@ -99,5 +105,6 @@ func Read() Reading {
 		Pressure:    units.Pa(p),
 		Humidity:    units.Percent(rh),
 		Altitude:    a.ToFt(),
+		Time:        time.Since(start),
 	}
 }
