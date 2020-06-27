@@ -11,7 +11,7 @@ import (
 func Start() {
 	client := influxdb2.NewClient("http://localhost:8086", "admin:admin")
 	writeApi := client.WriteApiBlocking("", "db0")
-	t := time.NewTicker(1 * time.Minute)
+	t := time.NewTicker(15 * time.Second)
 	for {
 		r := sensor.Read()
 		log.Printf("%s", r)
