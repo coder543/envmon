@@ -35,7 +35,7 @@ type Reading struct {
 	Temperature units.C
 	Pressure    units.Pa
 	Humidity    units.Percent
-	Altitude    units.M
+	Altitude    units.Ft
 }
 
 func (r Reading) String() string {
@@ -89,7 +89,7 @@ func Read() Reading {
 
 	if altOffset == 0 {
 		altOffset = a
-		log.Printf("altitude offset is now %s", altOffset)
+		log.Printf("altitude offset is now %s", altOffset.ToFt())
 	}
 
 	a = a - altOffset
@@ -98,6 +98,6 @@ func Read() Reading {
 		Temperature: units.C(t),
 		Pressure:    units.Pa(p),
 		Humidity:    units.Percent(rh),
-		Altitude:    units.M(a),
+		Altitude:    a.ToFt(),
 	}
 }
