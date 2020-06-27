@@ -82,6 +82,10 @@ func Read() Reading {
 	}
 
 	avgCount := 5
+	if altOffset == 0 {
+		avgCount = 30
+	}
+
 	aLarge := units.M(0)
 	for i := 0; i < avgCount; i++ {
 		aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
@@ -89,6 +93,7 @@ func Read() Reading {
 			log.Panic(err)
 		}
 		aLarge += units.M(aRaw)
+		time.Sleep(10 * time.Millisecond)
 	}
 
 	a := units.M(float32(aLarge) / float32(avgCount))
