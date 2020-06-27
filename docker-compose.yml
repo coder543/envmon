@@ -2,3 +2,5 @@ version: '3'
 services:
   envmon:
     build: .
+    volumes:
+      - /dev:/dev
