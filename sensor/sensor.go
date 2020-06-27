@@ -1,6 +1,7 @@
 package sensor
 
 import (
+	"envmon/units"
 	"fmt"
 	"github.com/d2r2/go-bsbmp"
 	"github.com/d2r2/go-i2c"
@@ -10,7 +11,7 @@ import (
 
 var sensor *bsbmp.BMP
 
-func Init(addr uint8, bus int) {
+func Init(addr uint8, bus int, realAltitudeFt int) {
 	// Create new connection to i2c-bus on 1 line with address 0x76.
 	// Use i2cdetect utility to find device address over the i2c-bus
 	i2cConn, err := i2c.NewI2C(addr, bus)
@@ -30,20 +31,20 @@ func Init(addr uint8, bus int) {
 }
 
 type Reading struct {
-	Temperature float32
-	Pressure    float32
-	Humidity    float32
-	Altitude    float32
+	Temperature units.C
+	Pressure    units.Pa
+	Humidity    units.Percent
+	Altitude    units.M
 }
 
 func (r Reading) String() string {
 	return strings.TrimSpace(
 		fmt.Sprintf(`
 Reading {
-	Temperature:	%.2f °C,
-	Pressure:	%.2f Pa,
-	Humidity:	%.2f%%,
-	Altitude:	%.2f m,
+	Temperature:	%s,
+	Pressure:	%s,
+	Humidity:	%s,
+	Altitude:	%s,
 }
 		`,
 			r.Temperature,
@@ -84,9 +85,9 @@ func Read() Reading {
 	}
 
 	return Reading{
-		Temperature: t,
-		Pressure:    p,
-		Humidity:    rh,
-		Altitude:    a,
+		Temperature: units.C(t),
+		Pressure:    units.Pa(p),
+		Humidity:    units.Percent(rh),
+		Altitude:    units.M(a),
 	}
 }

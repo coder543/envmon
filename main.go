@@ -9,6 +9,6 @@ import (
 func main() {
 	logger.ChangePackageLogLevel("i2c", logger.InfoLevel)
 	logger.ChangePackageLogLevel("bsbmp", logger.InfoLevel)
-	sensor.Init(0x77, 1)
+	sensor.Init(0x77, 1, 90)
 	monitor.Start()
 }
