@@ -33,8 +33,8 @@ func Init(addr uint8, bus int) {
 }
 
 type Reading struct {
-	Temperature units.C
-	Pressure    units.Pa
+	Temperature units.F
+	Pressure    units.Atm
 	Humidity    units.Percent
 	Altitude    units.Ft
 	Time        time.Duration
@@ -111,8 +111,8 @@ func Read() Reading {
 	a = a - altOffset
 
 	return Reading{
-		Temperature: units.C(t),
-		Pressure:    units.Pa(p),
+		Temperature: units.C(t).ToF(),
+		Pressure:    units.Pa(p).ToAtm(),
 		Humidity:    units.Percent(rh),
 		Altitude:    a.ToFt(),
 		Time:        time.Since(start),
