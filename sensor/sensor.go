@@ -11,7 +11,6 @@ import (
 )
 
 var sensor *bsbmp.BMP
-var altOffset units.M
 
 func Init(addr uint8, bus int) {
 	// Create new connection to i2c-bus on 1 line with address 0x76.
@@ -102,13 +101,6 @@ func Read() Reading {
 		altitudeHistory[1] = (altitudeHistory[1] + altitudeHistory[0]) / 2
 		altitudeHistory = altitudeHistory[1:]
 	}
-
-	if altOffset == 0 {
-		altOffset = a
-		log.Printf("altitude offset is now %s", altOffset.ToFt())
-	}
-
-	a = a - altOffset
 
 	return Reading{
 		Temperature: units.C(t).ToF(),
