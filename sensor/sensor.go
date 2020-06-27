@@ -60,6 +60,8 @@ Reading {
 	)
 }
 
+var altitudeHistory = []units.M{}
+
 func Read() Reading {
 	start := time.Now()
 
@@ -81,22 +83,25 @@ func Read() Reading {
 		log.Panic(err)
 	}
 
-	avgCount := 5
-	if altOffset == 0 {
-		avgCount = 30
+	aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
+	if err != nil {
+		log.Panic(err)
 	}
+	altitudeHistory = append(altitudeHistory, units.M(aRaw))
 
 	aLarge := units.M(0)
-	for i := 0; i < avgCount; i++ {
-		aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
-		if err != nil {
-			log.Panic(err)
-		}
-		aLarge += units.M(aRaw)
-		time.Sleep(10 * time.Millisecond)
+
+	for _, alt := range altitudeHistory {
+		aLarge += alt
 	}
 
-	a := units.M(float32(aLarge) / float32(avgCount))
+	a := units.M(float32(aLarge) / float32(len(altitudeHistory)))
+
+	if len(altitudeHistory) > 4 {
+		// moving average filter with IIR, weighted as part of a regular FIR moving average
+		altitudeHistory[1] = (altitudeHistory[1] + altitudeHistory[0]) / 2
+		altitudeHistory = altitudeHistory[1:]
+	}
 
 	if altOffset == 0 {
 		altOffset = a
