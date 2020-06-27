@@ -97,7 +97,7 @@ func Read() Reading {
 
 	a := units.M(float32(aLarge) / float32(len(altitudeHistory)))
 
-	if len(altitudeHistory) > 4 {
+	if len(altitudeHistory) > 2 {
 		// moving average filter with IIR, weighted as part of a regular FIR moving average
 		altitudeHistory[1] = (altitudeHistory[1] + altitudeHistory[0]) / 2
 		altitudeHistory = altitudeHistory[1:]
