@@ -92,6 +92,7 @@ func Read() Reading {
 
 	if altOffset == 0 {
 		altOffset = a - realAlt
+		log.Printf("altitude offset is now %s", altOffset)
 	}
 
 	a = a - altOffset
