@@ -4,3 +4,4 @@ services:
     build: .
     volumes:
       - /dev:/dev
+    privileged: true
