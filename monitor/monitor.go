@@ -22,10 +22,10 @@ func Start() {
 				"location": "inside",
 			},
 			map[string]interface{}{
-				"temperature": r.Temperature,
-				"humidity":    r.Humidity,
-				"pressure":    r.Pressure,
-				"altitude":    r.Altitude,
+				"temperature": float32(r.Temperature),
+				"humidity":    float32(r.Humidity),
+				"pressure":    float32(r.Pressure),
+				"altitude":    float32(r.Altitude),
 			},
 			time.Now(),
 		)
