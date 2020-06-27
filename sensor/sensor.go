@@ -10,10 +10,9 @@ import (
 )
 
 var sensor *bsbmp.BMP
-var realAlt units.M
 var altOffset units.M
 
-func Init(addr uint8, bus int, realAltitude units.Ft) {
+func Init(addr uint8, bus int) {
 	// Create new connection to i2c-bus on 1 line with address 0x76.
 	// Use i2cdetect utility to find device address over the i2c-bus
 	i2cConn, err := i2c.NewI2C(addr, bus)
@@ -30,8 +29,6 @@ func Init(addr uint8, bus int, realAltitude units.Ft) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	realAlt = realAltitude.ToM()
 }
 
 type Reading struct {
@@ -91,7 +88,7 @@ func Read() Reading {
 	a := units.M(aRaw)
 
 	if altOffset == 0 {
-		altOffset = a - realAlt
+		altOffset = a
 		log.Printf("altitude offset is now %s", altOffset)
 	}
 
