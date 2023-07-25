@@ -1,9 +1,14 @@
 FROM golang:latest
 
 WORKDIR /root/envmon
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
 COPY . .
 
-RUN go get -d -v ./...
 RUN go install -v ./...
 
 CMD ["envmon"]

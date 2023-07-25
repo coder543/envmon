@@ -3,11 +3,12 @@ package sensor
 import (
 	"envmon/units"
 	"fmt"
-	"github.com/d2r2/go-bsbmp"
-	"github.com/d2r2/go-i2c"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/d2r2/go-bsbmp"
+	"github.com/d2r2/go-i2c"
 )
 
 var sensor *bsbmp.BMP
@@ -35,7 +36,6 @@ type Reading struct {
 	Temperature units.C
 	Pressure    units.Pa
 	Humidity    units.Percent
-	Altitude    units.M
 	Time        time.Duration
 }
 
@@ -46,20 +46,16 @@ Reading {
 	Temperature:	%s,
 	Pressure:	%s,
 	Humidity:	%s,
-	Altitude:	%s,
 	MeasureT:	%s,
 }
 		`,
 			r.Temperature,
 			r.Pressure,
 			r.Humidity,
-			r.Altitude,
 			r.Time,
 		),
 	)
 }
-
-var altitudeHistory = []units.M{}
 
 func Read() Reading {
 	start := time.Now()
@@ -82,31 +78,10 @@ func Read() Reading {
 		log.Panic(err)
 	}
 
-	aRaw, err := sensor.ReadAltitude(bsbmp.ACCURACY_ULTRA_HIGH)
-	if err != nil {
-		log.Panic(err)
-	}
-	altitudeHistory = append(altitudeHistory, units.M(aRaw))
-
-	aLarge := units.M(0)
-
-	for _, alt := range altitudeHistory {
-		aLarge += alt
-	}
-
-	a := units.M(float32(aLarge) / float32(len(altitudeHistory)))
-
-	if len(altitudeHistory) > 2 {
-		// moving average filter with IIR, weighted as part of a regular FIR moving average
-		altitudeHistory[1] = (altitudeHistory[1] + altitudeHistory[0]) / 2
-		altitudeHistory = altitudeHistory[1:]
-	}
-
 	return Reading{
 		Temperature: units.C(t),
 		Pressure:    units.Pa(p),
 		Humidity:    units.Percent(rh),
-		Altitude:    a,
 		Time:        time.Since(start),
 	}
 }

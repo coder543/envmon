@@ -3,13 +3,14 @@ package monitor
 import (
 	"context"
 	"envmon/sensor"
-	"github.com/influxdata/influxdb-client-go"
 	"log"
 	"time"
+
+	influxdb2 "github.com/influxdata/influxdb-client-go"
 )
 
 func Start() {
-	client := influxdb2.NewClient("http://localhost:8086", "admin:admin")
+	client := influxdb2.NewClient("http://192.168.88.21:8086", "admin:admin")
 	writeApi := client.WriteApiBlocking("", "db0")
 	t := time.NewTicker(15 * time.Second)
 	for {
@@ -25,7 +26,6 @@ func Start() {
 				"temperature": float32(r.Temperature),
 				"humidity":    float32(r.Humidity),
 				"pressure":    float32(r.Pressure),
-				"altitude":    float32(r.Altitude),
 			},
 			time.Now(),
 		)
