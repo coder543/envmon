@@ -4,20 +4,22 @@ import (
 	"context"
 	"envmon/sensor"
 	"log"
+	"os"
 	"time"
 
-	influxdb2 "github.com/influxdata/influxdb-client-go"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 )
 
 func Start() {
-	client := influxdb2.NewClient("http://192.168.88.21:8086", "admin:admin")
-	writeApi := client.WriteApiBlocking("", "db0")
+	client := influxdb2.NewClient("http://192.168.88.21:8086", os.Getenv("INFLUXDB_TOKEN"))
+	writeAPI := client.WriteAPIBlocking("Home", "Home")
 	t := time.NewTicker(15 * time.Second)
 	for {
 		r := sensor.Read()
 		log.Printf("%s", r)
 
-		p := influxdb2.NewPoint(
+		p := write.NewPoint(
 			"environment",
 			map[string]string{
 				"location": "inside",
@@ -30,7 +32,7 @@ func Start() {
 			time.Now(),
 		)
 
-		err := writeApi.WritePoint(context.Background(), p)
+		err := writeAPI.WritePoint(context.Background(), p)
 		if err != nil {
 			log.Println(err)
 		}
